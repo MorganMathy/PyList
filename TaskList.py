@@ -1,67 +1,70 @@
 import sys
+import os
+import json
+
+# PWD du fichier
+CUR_DIR = os.path.dirname(__file__)
+LISTE_PATH = os.path.join(CUR_DIR, "liste.json")
+
 
 # Liste des choix possibles
-choices = ['Ajouter une tâche à la liste', 'Retirer une tâche de la liste', 'Afficher les éléments de la liste de tâches', 'Vider la liste de tâches', 'Quitter le programme']
-tasks = []
+MENU = """Choisissez une option parmi les 5 suivantes :
+1: Ajouter une tâche à la liste
+2: Retirer une tâche de la liste
+3: Afficher votre liste de tâches
+4: Vider la liste de tâches
+5: Quitter le programme
+? Votre choix : """
+
+# Choix utilisateur
+MENU_CHOICES = ['1', '2', '3', '4', '5']
+
+# Récupération du JSON si no JSON on crée une liste
+if os.path.exists(LISTE_PATH):
+    with open(LISTE_PATH, "r") as f:
+        LISTE = json.load(f)
+else:
+    LISTE = []
 
 while True:
-    # Affichage des choix possibles
-    for index, choice in enumerate(choices, start=1):
-        print(f'{index} - {choice}')
+    # Validation du choix
+    user_choice = ""
+    while user_choice not in MENU_CHOICES:
+        user_choice = input(MENU)
+        if user_choice not in MENU_CHOICES:
+            print("Veuillez choisir une option valide...")
 
-    # Demande de choix à l'utilisateur
-    choice = input('Choisissez l\'action à effectuer : ')
+    # Différents cas 
+    if user_choice == "1":  # Ajouter un élément
+            item = input("Entrez le nom d'une tâche à ajouter à la liste : ")
+            LISTE.append(item)
+            print(f"La tâche '{item}' a bien été ajouté à la liste.")
 
-    # Vérification de la validité du choix
-    if not choice.isdigit() or not 1 <= int(choice) <= len(choices):
-        print(f'Merci de sélectionner un nombre entre 1 et {len(choices)}')
-        continue
-
-    # Conversion du choix en entier
-    choice = int(choice)
-
-    # Ajout d'une tâche
-    if choice == 1:
-        new_task = input('Nouvelle tâche : ')
-        tasks.append(new_task)
-
-    # Retrait d'une tâche
-    elif choice == 2:
-        if len(tasks) == 0:
-            print('La liste de tâches est vide.')
-        else:
-            print('Voici la liste des tâches :')
-            for index, task in enumerate(tasks, start=1):
-                print(f'{index} - {task}')
-            task_to_delete = input('Entrez le numéro de la tâche à supprimer : ')
-            if not task_to_delete.isdigit() or not 1 <= int(task_to_delete) <= len(tasks):
-                print('Numéro de tâche invalide.')
+    elif user_choice == "2":  # Retirer un élément
+            item = input("Entrez le nom d'une tâche à retirer de la liste : ")
+            if item in LISTE:
+                LISTE.remove(item)
+                print(f"La tâche '{item}' a bien été supprimée de la liste.")
             else:
-                task_index = int(task_to_delete) - 1
-                deleted_task = tasks.pop(task_index)
-                print(f'La tâche "{deleted_task}" a été supprimée.')
+                print(f"La tâche '{item}' n'est pas dans la liste.")
 
-    # Affichage des tâches
-    elif choice == 3:
-        if len(tasks) == 0:
-            print('La liste de tâches est vide.')
+    elif user_choice == "3":  # Afficher la liste
+        if LISTE:
+            print("Voici le contenu de votre liste :")
+            for i, item in enumerate(LISTE, 1):
+                print(f"{i}. {item}")
         else:
-            print('Voici la liste des tâches :')
-            for index, task in enumerate(tasks, start=1):
-                print(f'{index} - {task}')
+            print("Votre liste ne contient aucune tâche.")
 
-    # Vider la liste de tâches
-    elif choice == 4:
-        if len(tasks) == 0:
-            print('La liste de tâches est déjà vide.')
-        else:
-            tasks.clear()
-            print('La liste de tâches a été vidée.')
+    elif user_choice == "4":  # Vider la liste
+        LISTE.clear()
+        print("La liste de tâches a été vidée de son contenu.")
 
-    # Quitter le programme
-    elif choice == 5:
-        print('Au revoir !')
+    elif user_choice == "5":  # Sauvegarder et quitter
+        with open(LISTE_PATH, "w") as f:
+            json.dump(LISTE, f, indent=4)
+        print("À bientôt !")
         sys.exit()
 
-    print()  # Ligne vide pour séparer les actions
-
+    print("-" * 50)
+    
